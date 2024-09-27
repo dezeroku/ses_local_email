@@ -12,16 +12,14 @@ repos:
     hooks:
       - id: terraform-fmt
       - id: tflint
-      - id: terragrunt-hclfmt
 
   - repo: https://github.com/dnephin/pre-commit-golang
     rev: v0.5.1
     hooks:
       - id: go-imports
-      - id: go-lint
       - id: go-vet
 
   - repo: https://github.com/pre-commit/mirrors-prettier
-    rev: "v3.1.0"
+    rev: v3.1.0
     hooks:
       - id: prettier

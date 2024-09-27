@@ -1,0 +1,37 @@
+---
+name: Lint files
+
+on:
+  push:
+
+  workflow_dispatch:
+
+  pull_request:
+jobs:
+  pre-commit:
+    runs-on: ubuntu-latest
+    env:
+      python_version: "3.11"
+      go_version: "1.23"
+      goimports_version: "v0.25.0"
+      tflint_version: "v0.47.0"
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.python_version }}
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.go_version }}
+
+      - run: |
+          go install golang.org/x/tools/cmd/goimports@${{ env.goimports_version }}
+
+      - uses: terraform-linters/setup-tflint@v4
+        with:
+          tflint_version: ${{ env.tflint_version }}
+
+      - uses: pre-commit/action@v3.0.1
