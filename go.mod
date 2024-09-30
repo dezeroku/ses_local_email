@@ -1,4 +1,4 @@
-module ses_local_email
+module github.com/dezeroku/ses_local_email
 
 go 1.23.1
 

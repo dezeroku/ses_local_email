@@ -62,7 +62,7 @@ Terraform module also creates user with required policy permissions assigned and
 Small Go program is provided that can be run with Golang directly:
 
 ```
-go install ...
+go install github.com/dezeroku/ses_local_email@latest
 ses_local_email
 ```
 
