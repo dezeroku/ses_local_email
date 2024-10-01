@@ -2,14 +2,18 @@
 
 Receive emails via SES and store them in S3 bucket (setup via terraform).
 
-On top of that, a small golang utility is provided that periodically monitors the bucket for changes and downloads the emails if new ones were added (also removing them from the bucket).
+On top of that, there are golang utilities:
+
+- `s3_monitor`, monitors remote bucket for changes and downloads files if new ones were added (also removing them from the bucket).
+  Adds `.eml` suffix to the files
+- `eml_unpack_attachments`, monitors local directory for new files and unpacks attachments from them (assumes that new files are .eml)
 
 ## How does it work?
 
 High level overview of the flow:
 ![Architecture](docs/diagrams/created/overview.png?raw=true "Overview")
 
-The "Bare Metal" part logic:
+The "Monitor" part logic:
 
 ```mermaid
   flowchart LR
@@ -59,17 +63,21 @@ Terraform module also creates user with required policy permissions assigned and
 
 ### Bare metal
 
-Small Go program is provided that can be run with Golang directly:
+#### Download from S3
+
+Small Go program is provided that can be used to download S3 objects as soon as they appear.
+
+To run with Golang directly:
 
 ```
-go install github.com/dezeroku/ses_local_email@v0.1.0
+go install github.com/dezeroku/ses_local_email/s3_monitor@v0.2.0
 ses_local_email
 ```
 
 It's also available as a container:
 
 ```
-docker run ghcr.io/dezeroku/ses_local_email:latest
+docker run ghcr.io/dezeroku/ses_local_email_s3_monitor:latest
 ```
 
 In both cases you'll have to set few environment variables for the program to work correctly:
@@ -84,6 +92,31 @@ Few useful variables that can be used here are:
 - AWS_REGION
 - AWS_ACCESS_KEY_ID
 - AWS_SECRET_ACCESS_KEY
+
+#### Unpack .eml attachments
+
+Paperless doesn't seem to like [consuming .eml attachments from local storage](https://github.com/paperless-ngx/paperless-ngx/discussions/2823#discussion-4925418).
+So we need to manually unpack the attachments from `.eml` file before having them consumed by paperless.
+
+Small Go helper is written for just that
+
+To run with Golang directly:
+
+```
+go install github.com/dezeroku/ses_local_email_eml_unpack_attachments@v0.2.0
+ses_local_email
+```
+
+It's also available as a container:
+
+```
+docker run ghcr.io/dezeroku/ses_local_email_eml_unpack_attachments:latest
+```
+
+In both cases you'll have to set few environment variables for the program to work correctly:
+
+- INPUT_DIRECTORY (local directory to monitor for `.eml` files)
+- OUTPUT_DIRECTORY (where to put the unpacked attachments)
 
 ## But why?
 

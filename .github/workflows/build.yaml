@@ -14,10 +14,16 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
+  IMAGE_PREFIX: ${{ github.repository }}
 
 jobs:
   docker:
+    strategy:
+      fail-fast: false
+      matrix:
+        cfg:
+          - component: "s3_monitor"
+          - component: "eml_unpack_attachments"
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -44,12 +50,13 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}_${{ matrix.cfg.component }}
 
       - name: Build and push
         uses: docker/build-push-action@v4
         with:
-          context: .
+          context: ${{ matrix.cfg.component }}
+          file: Dockerfile
           platforms: linux/amd64,linux/arm64
           push: true
           tags: ${{ steps.meta.outputs.tags }}

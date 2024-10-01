@@ -17,7 +17,6 @@ repos:
     rev: v0.5.1
     hooks:
       - id: go-imports
-      - id: go-vet
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.6.8

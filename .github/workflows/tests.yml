@@ -7,6 +7,12 @@ on:
   pull_request:
 jobs:
   tests:
+    strategy:
+      fail-fast: false
+      matrix:
+        cfg:
+          - component: "s3_monitor"
+          - component: "eml_unpack_attachments"
     runs-on: ubuntu-latest
     env:
       go_version: "1.23"
@@ -18,4 +24,5 @@ jobs:
           go-version: ${{ env.go_version }}
 
       - run: |
+          cd ${{ matrix.cfg.component }}
           go test -v ./...

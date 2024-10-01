@@ -7,7 +7,7 @@ RUN go mod download
 
 COPY *.go ./
 
-RUN CGO_ENABLED=0 GOOS=linux go build
+RUN CGO_ENABLED=0 GOOS=linux go build -o app
 
 FROM build-stage AS test
 RUN go test -v ./...
@@ -16,8 +16,8 @@ FROM gcr.io/distroless/static-debian12 AS release
 
 WORKDIR /
 
-COPY --from=build /app/ses_local_email /ses_local_email
+COPY --from=build /app/app /app
 
 USER nonroot:nonroot
 
-ENTRYPOINT ["/ses_local_email"]
+ENTRYPOINT ["/app"]

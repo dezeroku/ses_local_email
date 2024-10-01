@@ -1,4 +1,4 @@
-module github.com/dezeroku/ses_local_email
+module github.com/dezeroku/ses_local_email/s3_monitor
 
 go 1.23.1
 

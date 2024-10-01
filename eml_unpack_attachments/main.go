@@ -1,0 +1,125 @@
+package main
+
+import (
+	"bytes"
+	"io/ioutil"
+	"log"
+	"os"
+	"path"
+
+	"github.com/DusanKasan/parsemail"
+	"github.com/fsnotify/fsnotify"
+)
+
+var (
+	inputDirectoryEnvVar  = "INPUT_DIRECTORY"
+	outputDirectoryEnvVar = "OUTPUT_DIRECTORY"
+)
+
+func requireEnvVariable(name string) string {
+	value, present := os.LookupEnv(name)
+	if !present {
+		log.Fatalf("Env variable %s is required, but not present", name)
+	}
+	return value
+}
+
+func processEmail(filename string, outputDirectory string) error {
+	log.Print("Processing file: ", filename)
+
+	reader, err := os.Open(filename)
+	if err != nil {
+		return err
+	}
+	defer reader.Close()
+
+	email, err := parsemail.Parse(reader)
+	if err != nil {
+		return err
+	}
+
+	log.Printf("FROM: %s TO: %s SUBJECT: %s\n", email.From, email.To, email.Subject)
+	if len(email.Attachments) > 0 {
+		log.Print("Attachments:")
+		for _, a := range email.Attachments {
+			log.Print(a.Filename)
+			buf := new(bytes.Buffer)
+			buf.ReadFrom(a.Data)
+			err := os.WriteFile(path.Join(outputDirectory, a.Filename), buf.Bytes(), 0644)
+			if err != nil {
+				return err
+			}
+		}
+	} else {
+		log.Print("No attachments found")
+	}
+
+	log.Print("Removing file: ", filename)
+	err = os.Remove(filename)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func main() {
+	inputDirectory := requireEnvVariable(inputDirectoryEnvVar)
+	outputDirectoryVar := requireEnvVariable(outputDirectoryEnvVar)
+	outputDirectory := path.Clean(outputDirectoryVar)
+
+	os.MkdirAll(outputDirectory, os.ModePerm)
+
+	watcher, err := fsnotify.NewWatcher()
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer watcher.Close()
+
+	go func() {
+		for {
+			select {
+			case event, ok := <-watcher.Events:
+				if !ok {
+					return
+				}
+				if event.Has(fsnotify.Create) {
+					log.Print("New file: ", event.Name)
+
+					err := processEmail(event.Name, outputDirectory)
+					if err != nil {
+						log.Print(err)
+					}
+				}
+			case err, ok := <-watcher.Errors:
+				if !ok {
+					return
+				}
+				log.Fatal(err)
+			}
+		}
+	}()
+
+	err = watcher.Add(inputDirectory)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// TODO: a possible race condition here between fsnotify based logic and ReadDir
+	// Shouldn't bite us for now anyway as the names are unique, but it's something to keep in mind
+	// We need this call here, as fsnotify is only looking for new files, but we want to consider
+	// the already existing ones too
+	files, err := ioutil.ReadDir(inputDirectory)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	for _, file := range files {
+		err := processEmail(path.Join(inputDirectory, file.Name()), outputDirectory)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+
+	// Block main goroutine forever.
+	<-make(chan struct{})
+}
