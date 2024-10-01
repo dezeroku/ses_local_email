@@ -6,7 +6,7 @@ On top of that, there are golang utilities:
 
 - `s3_monitor`, monitors remote bucket for changes and downloads files if new ones were added (also removing them from the bucket).
   Adds `.eml` suffix to the files
-- `eml_unpack_attachments`, monitors local directory for new files and unpacks attachments from them (assumes that new files are .eml)
+- `eml_unpack_attachments`, monitors local directory for new `.eml` files and unpacks attachments from them
 
 ## How does it work?
 
@@ -117,6 +117,8 @@ In both cases you'll have to set few environment variables for the program to wo
 
 - INPUT_DIRECTORY (local directory to monitor for `.eml` files)
 - OUTPUT_DIRECTORY (where to put the unpacked attachments)
+
+After the `.eml` file is unpacked, it is removed as it's not needed anymore.
 
 ## But why?
 

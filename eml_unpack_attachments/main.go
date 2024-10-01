@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"path"
+	"strings"
 
 	"github.com/DusanKasan/parsemail"
 	"github.com/fsnotify/fsnotify"
@@ -24,8 +25,23 @@ func requireEnvVariable(name string) string {
 	return value
 }
 
-func processEmail(filename string, outputDirectory string) error {
+func processNewFile(filename string, outputDirectory string) error {
 	log.Print("Processing file: ", filename)
+
+	if !strings.HasSuffix(filename, ".eml") {
+		log.Print("File doesn't have .eml extension, skipping: ", filename)
+		return nil
+	}
+
+	fileInfo, err := os.Stat(filename)
+	if err != nil {
+		return err
+	}
+
+	if fileInfo.IsDir() {
+		log.Print("File is a directory, skipping: ", filename)
+		return nil
+	}
 
 	reader, err := os.Open(filename)
 	if err != nil {
@@ -85,7 +101,7 @@ func main() {
 				if event.Has(fsnotify.Create) {
 					log.Print("New file: ", event.Name)
 
-					err := processEmail(event.Name, outputDirectory)
+					err := processNewFile(event.Name, outputDirectory)
 					if err != nil {
 						log.Print(err)
 					}
@@ -114,7 +130,7 @@ func main() {
 	}
 
 	for _, file := range files {
-		err := processEmail(path.Join(inputDirectory, file.Name()), outputDirectory)
+		err := processNewFile(path.Join(inputDirectory, file.Name()), outputDirectory)
 		if err != nil {
 			log.Fatal(err)
 		}
