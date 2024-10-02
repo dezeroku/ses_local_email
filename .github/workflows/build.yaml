@@ -40,7 +40,7 @@ jobs:
         uses: docker/setup-buildx-action@v3
 
       - name: Login to Container Registry
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
@@ -53,7 +53,7 @@ jobs:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}_${{ matrix.cfg.component }}
 
       - name: Build and push
-        uses: docker/build-push-action@v4
+        uses: docker/build-push-action@v6
         with:
           context: ${{ matrix.cfg.component }}
           file: Dockerfile
