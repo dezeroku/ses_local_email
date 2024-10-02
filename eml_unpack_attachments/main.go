@@ -1,15 +1,14 @@
 package main
 
 import (
-	"bytes"
 	"io/ioutil"
 	"log"
 	"os"
 	"path"
 	"strings"
 
-	"github.com/DusanKasan/parsemail"
 	"github.com/fsnotify/fsnotify"
+	"github.com/mnako/letters"
 )
 
 var (
@@ -49,19 +48,18 @@ func processNewFile(filename string, outputDirectory string) error {
 	}
 	defer reader.Close()
 
-	email, err := parsemail.Parse(reader)
+	email, err := letters.ParseEmail(reader)
 	if err != nil {
 		return err
 	}
 
-	log.Printf("FROM: %s TO: %s SUBJECT: %s\n", email.From, email.To, email.Subject)
-	if len(email.Attachments) > 0 {
+	log.Printf("FROM: %s TO: %s SUBJECT: %s\n", email.Headers.From, email.Headers.To, email.Headers.Subject)
+	if len(email.AttachedFiles) > 0 {
 		log.Print("Attachments:")
-		for _, a := range email.Attachments {
-			log.Print(a.Filename)
-			buf := new(bytes.Buffer)
-			buf.ReadFrom(a.Data)
-			err := os.WriteFile(path.Join(outputDirectory, a.Filename), buf.Bytes(), 0644)
+		for _, a := range email.AttachedFiles {
+			attachmentName := a.ContentType.Params["name"]
+			log.Print(attachmentName)
+			err := os.WriteFile(path.Join(outputDirectory, attachmentName), a.Data, 0644)
 			if err != nil {
 				return err
 			}
