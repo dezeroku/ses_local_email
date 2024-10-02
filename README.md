@@ -117,6 +117,7 @@ In both cases you'll have to set few environment variables for the program to wo
 
 - INPUT_DIRECTORY (local directory to monitor for `.eml` files)
 - OUTPUT_DIRECTORY (where to put the unpacked attachments)
+- ALLOWED_CONTENT_TYPES_REGEX (optional, defaults to `.*`)
 
 After the `.eml` file is unpacked, it is removed as it's not needed anymore.
 

@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"path"
+	"regexp"
 	"strings"
 
 	"github.com/fsnotify/fsnotify"
@@ -12,8 +13,9 @@ import (
 )
 
 var (
-	inputDirectoryEnvVar  = "INPUT_DIRECTORY"
-	outputDirectoryEnvVar = "OUTPUT_DIRECTORY"
+	inputDirectoryEnvVar         = "INPUT_DIRECTORY"
+	outputDirectoryEnvVar        = "OUTPUT_DIRECTORY"
+	allowedContentTypesRegEnvVar = "ALLOWED_CONTENT_TYPES_REGEX"
 )
 
 func requireEnvVariable(name string) string {
@@ -24,7 +26,7 @@ func requireEnvVariable(name string) string {
 	return value
 }
 
-func processNewFile(filename string, outputDirectory string) error {
+func processNewFile(filename string, outputDirectory string, allowedContentTypesReg *regexp.Regexp) error {
 	log.Print("Processing file: ", filename)
 
 	if !strings.HasSuffix(filename, ".eml") {
@@ -59,6 +61,13 @@ func processNewFile(filename string, outputDirectory string) error {
 		for _, a := range email.AttachedFiles {
 			attachmentName := a.ContentType.Params["name"]
 			log.Print(attachmentName)
+			contentType := a.ContentType.ContentType
+
+			if !allowedContentTypesReg.MatchString(contentType) {
+				log.Print("Not supported contentType, skipping: ", contentType)
+				continue
+			}
+
 			err := os.WriteFile(path.Join(outputDirectory, attachmentName), a.Data, 0644)
 			if err != nil {
 				return err
@@ -83,6 +92,14 @@ func main() {
 
 	os.MkdirAll(outputDirectory, os.ModePerm)
 
+	allowedContentTypesRegVar, present := os.LookupEnv(allowedContentTypesRegEnvVar)
+	if !present {
+		allowedContentTypesRegVar = ".*"
+		log.Printf("%s env variable not provided, defaulting to: %s\n", allowedContentTypesRegEnvVar, allowedContentTypesRegVar)
+	}
+
+	allowedContentTypesReg := regexp.MustCompile(allowedContentTypesRegVar)
+
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
 		log.Fatal(err)
@@ -99,7 +116,7 @@ func main() {
 				if event.Has(fsnotify.Create) {
 					log.Print("New file: ", event.Name)
 
-					err := processNewFile(event.Name, outputDirectory)
+					err := processNewFile(event.Name, outputDirectory, allowedContentTypesReg)
 					if err != nil {
 						log.Print(err)
 					}
@@ -128,7 +145,7 @@ func main() {
 	}
 
 	for _, file := range files {
-		err := processNewFile(path.Join(inputDirectory, file.Name()), outputDirectory)
+		err := processNewFile(path.Join(inputDirectory, file.Name()), outputDirectory, allowedContentTypesReg)
 		if err != nil {
 			log.Fatal(err)
 		}
