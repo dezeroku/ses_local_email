@@ -84,7 +84,7 @@ func main() {
 
 			// Write to a .tmp file first and rename later on, to play nicely with fsnotify
 			// and ensure that write is complete
-			if err := DownloadFile(s3Client, bucketName, objectKey, path.Join(storagePath, filePathTmp)); err != nil {
+			if err := DownloadFile(s3Client, bucketName, objectKey, filePathTmp); err != nil {
 				log.Fatal(err)
 			}
 			if err := os.Rename(filePathTmp, filePath); err != nil {
