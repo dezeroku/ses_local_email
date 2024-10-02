@@ -79,9 +79,15 @@ func main() {
 			}
 
 			objectKey := event.Detail.Object.Key
-			fileName := objectKey + addedObjectSuffix
+			filePath := path.Join(storagePath, objectKey+addedObjectSuffix)
+			filePathTmp := filePath + ".tmp"
 
-			if err := DownloadFile(s3Client, bucketName, objectKey, path.Join(storagePath, fileName)); err != nil {
+			// Write to a .tmp file first and rename later on, to play nicely with fsnotify
+			// and ensure that write is complete
+			if err := DownloadFile(s3Client, bucketName, objectKey, path.Join(storagePath, filePathTmp)); err != nil {
+				log.Fatal(err)
+			}
+			if err := os.Rename(filePathTmp, filePath); err != nil {
 				log.Fatal(err)
 			}
 
