@@ -26,6 +26,49 @@ func requireEnvVariable(name string) string {
 	return value
 }
 
+func handleAttachments(attachments []letters.AttachedFile, outputDirectory string, allowedContentTypesReg *regexp.Regexp) error {
+	for _, a := range attachments {
+		attachmentName := a.ContentType.Params["name"]
+		log.Print(attachmentName)
+		contentType := a.ContentType.ContentType
+
+		if !allowedContentTypesReg.MatchString(contentType) {
+			log.Print("Not supported contentType, skipping: ", contentType)
+			continue
+		}
+
+		err := os.WriteFile(path.Join(outputDirectory, attachmentName), a.Data, 0644)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func handleInlineFiles(attachments []letters.InlineFile, outputDirectory string, allowedContentTypesReg *regexp.Regexp) error {
+	// It's basically the same logic as for handleAttachments, but I didn't manage to wrap it with generics
+	for _, a := range attachments {
+		contentType := a.ContentType.ContentType
+
+		if !allowedContentTypesReg.MatchString(contentType) {
+			log.Print("Not supported contentType, skipping: ", contentType)
+			continue
+		}
+
+		// TODO: are inlineFiles guaranteed to have the "name" param?
+		// Maybe we should fallback to generating names randomly or MD5 hashing the content and using that
+		// It's important to correctly handle the extension in such case
+		attachmentName := a.ContentType.Params["name"]
+		log.Print(attachmentName)
+
+		err := os.WriteFile(path.Join(outputDirectory, attachmentName), a.Data, 0644)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 func processNewFile(filename string, outputDirectory string, allowedContentTypesReg *regexp.Regexp) error {
 	log.Print("Processing file: ", filename)
 
@@ -58,23 +101,14 @@ func processNewFile(filename string, outputDirectory string, allowedContentTypes
 	log.Printf("FROM: %s TO: %s SUBJECT: %s\n", email.Headers.From, email.Headers.To, email.Headers.Subject)
 	if len(email.AttachedFiles) > 0 {
 		log.Print("Attachments:")
-		for _, a := range email.AttachedFiles {
-			attachmentName := a.ContentType.Params["name"]
-			log.Print(attachmentName)
-			contentType := a.ContentType.ContentType
-
-			if !allowedContentTypesReg.MatchString(contentType) {
-				log.Print("Not supported contentType, skipping: ", contentType)
-				continue
-			}
-
-			err := os.WriteFile(path.Join(outputDirectory, attachmentName), a.Data, 0644)
-			if err != nil {
-				return err
-			}
-		}
+		handleAttachments(email.AttachedFiles, outputDirectory, allowedContentTypesReg)
 	} else {
 		log.Print("No attachments found")
+	}
+
+	if len(email.InlineFiles) > 0 {
+		log.Print("InlineFiles:")
+		handleInlineFiles(email.InlineFiles, outputDirectory, allowedContentTypesReg)
 	}
 
 	log.Print("Removing file: ", filename)
