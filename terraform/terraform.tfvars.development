@@ -1,0 +1,9 @@
+# Example set of variables that can be used for development (requires only domain changes), without conflicting with the prod deployment
+# Please note that the SES ruleset will point exclusively to the development resources,
+# thus causing downtime for production
+recipients                         = ["develop@incoming.example.com"]
+senders_regex                      = "contact@example.com"
+user_name                          = "ses-local-email-develop"
+ses_rule_set_name                  = "ses-local-email-develop"
+lambda_entry_checker_function_name = "ses-local-email-entry-checker-develop"
+lambda_entry_checker_iam_role_name = "ses-local-email-entry-checker-develop"

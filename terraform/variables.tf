@@ -36,6 +36,32 @@ variable "user_name" {
   default = "ses-local-email"
 }
 
+variable "lambda_entry_checker_src_dir" {
+  type    = string
+  default = "../lambda/entry_checker"
+}
+
+variable "lambda_entry_checker_payload_dir" {
+  type    = string
+  default = "../lambda/entry_checker/payload"
+}
+
+variable "lambda_entry_checker_function_name" {
+  type    = string
+  default = "ses-local-email-entry-checker"
+}
+
+variable "lambda_entry_checker_iam_role_name" {
+  type    = string
+  default = "ses-local-email-entry-checker"
+}
+
+variable "senders_regex" {
+  type        = string
+  description = "Regex describing allowed sender emails"
+  default     = ".*"
+}
+
 # REQUIRED
 variable "recipients" {
   type        = list(string)
