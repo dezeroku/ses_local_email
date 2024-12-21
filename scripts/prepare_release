@@ -45,6 +45,10 @@ fi
 sed -i "s/default     = \".*\" #SED_RELEASE_VERSION/default     = \"$tag_name\" #SED_RELEASE_VERSION/" terraform/variables.tf
 git add terraform/variables.tf
 
+sed -i "s/@.* #SED_RELEASE_VERSION/@$tag_name #SED_RELEASE_VERSION/" README.md
+sed -i "s/:.* #SED_RELEASE_VERSION/:$tag_name #SED_RELEASE_VERSION/" README.md
+git add README.md
+
 # And create a commit and a tag
 git commit -m "chore: prepare release of ${tag_name}"
 git tag "${tag_name}"

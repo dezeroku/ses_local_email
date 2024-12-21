@@ -78,14 +78,14 @@ Small Go program is provided that can be used to download S3 objects as soon as 
 To run with Golang directly:
 
 ```
-go install github.com/dezeroku/ses_local_email/s3_monitor@v0.2.0
+go install github.com/dezeroku/ses_local_email/s3_monitor@v0.5.0 #SED_RELEASE_VERSION
 ses_local_email
 ```
 
 It's also available as a container:
 
 ```
-docker run ghcr.io/dezeroku/ses_local_email_s3_monitor:latest
+docker run ghcr.io/dezeroku/ses_local_email_s3_monitor:v0.5.0 #SED_RELEASE_VERSION
 ```
 
 In both cases you'll have to set few environment variables for the program to work correctly:
@@ -111,14 +111,14 @@ Small Go helper is written for just that
 To run with Golang directly:
 
 ```
-go install github.com/dezeroku/ses_local_email_eml_unpack_attachments@v0.2.0
+go install github.com/dezeroku/ses_local_email_eml_unpack_attachments@v0.5.0 #SED_RELEASE_VERSION
 ses_local_email
 ```
 
 It's also available as a container:
 
 ```
-docker run ghcr.io/dezeroku/ses_local_email_eml_unpack_attachments:latest
+docker run ghcr.io/dezeroku/ses_local_email_eml_unpack_attachments:v0.5.0 #SED_RELEASE_VERSION
 ```
 
 In both cases you'll have to set few environment variables for the program to work correctly:
