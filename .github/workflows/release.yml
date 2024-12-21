@@ -1,0 +1,34 @@
+name: Release new version
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+jobs:
+  # Docker images are handled with the usual flow, nothing needs to be done here in that regard
+  github-release:
+    runs-on: ubuntu-latest
+    needs: docker-release
+    steps:
+      - name: Get release version
+        run: echo "RELEASE_VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Zip the app
+        run: |
+          mkdir dist
+          zip -r dist/ses-local-email-entry-checker-${{ env.RELEASE_VERSION }}.zip lambda/entry_checker/*
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          fail_on_unmatched_files: true
+          files: |
+            dist/*
+          tag_name: v${{ env.RELEASE_VERSION }}
+          draft: true
+          body: |
+            ## v${{ env.RELEASE_VERSION }}
