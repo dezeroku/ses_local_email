@@ -10,10 +10,10 @@ resource "aws_s3_bucket" "bucket" {
 
 resource "aws_s3_bucket_policy" "allow_ses_access" {
   bucket = aws_s3_bucket.bucket.id
-  policy = data.aws_iam_policy_document.allow_ses_access.json
+  policy = data.aws_iam_policy_document.bucket_allow_ses_access.json
 }
 
-data "aws_iam_policy_document" "allow_ses_access" {
+data "aws_iam_policy_document" "bucket_allow_ses_access" {
   statement {
     principals {
       type        = "Service"

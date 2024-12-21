@@ -44,7 +44,7 @@ This repository consists of two parts:
 
 Terraform module is provided in `terraform` directory.
 It can be used to create necessary components on AWS's end.
-It's required to set up [SES email receiving](https://docs.aws.amazon.com/ses/latest/dg/receiving-email-setting-up.html) first and
+It's required to set up [SES email receiving](https://docs.aws.amazon.com/ses/latest/dg/receiving-email-setting-up.html) first,
 configuring this part is outside the scope of this project.
 
 The minimum to get started is:
@@ -53,6 +53,14 @@ The minimum to get started is:
 
 ```
 recipients = ["some-email@your-domain.com", "yet-another-email@your-domain.com"]
+```
+
+It's also recommended (but optional) to set a regex describing allowed senders.
+Emails sent from different addresses will simply be ignored.
+It can be set as below:
+
+```
+senders = ".*@example.com"
 ```
 
 2. run `terraform init`
