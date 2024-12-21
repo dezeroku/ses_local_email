@@ -60,7 +60,7 @@ Emails sent from different addresses will simply be ignored.
 It can be set as below:
 
 ```
-senders = ".*@example.com"
+senders_regex = ".*@example.com"
 ```
 
 2. run `terraform init`
