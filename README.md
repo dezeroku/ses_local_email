@@ -143,3 +143,16 @@ It is also much more interesting to play with than simply creating a separate em
 
 One important caveat is that this tool is intended to run as a sidecar in K8S that fetches emails and puts them in pod's filesystem, so Paperless mechanism can consume it, it does not work with Paperless' IMAP mechanism.
 But that should be more than enough to do the job.
+
+## Development
+
+### Releases
+
+Github action is responsible for creating a draft release that includes necessary packages (e.g. it's responsible for packaging Lambdas source code).
+To prepare a release:
+
+- make sure that you are checked out on the main branch and up-to-date with upstream
+- run `scripts/prepare_release <tag name>`, where `<tag name>` must follow `v*.*.*` (usual semver) to create a release commit
+- push the changes (both to the branch and new tag)
+- wait for the github release action to finish
+- modify the draft release as needed and publish it

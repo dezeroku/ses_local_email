@@ -1,0 +1,38 @@
+name: Release new version
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+jobs:
+  # Docker images are handled with the usual flow, nothing needs to be done here in that regard
+  github-release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Zip the app
+        run: |
+          mkdir dist
+
+          cd lambda
+          # TODO: proper packaging with poetry would be advised
+          # though it's a bit special for Lambdas + it would need to be implemented for local development too
+          zip -r ../dist/ses-local-email-entry-checker-${{ github.ref_name }}.zip entry_checker/*
+
+          cd ..
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          fail_on_unmatched_files: true
+          files: |
+            dist/*
+          tag_name: ${{github.ref_name}}
+          draft: true
+          body: |
+            ## ${{ github.ref_name }}
