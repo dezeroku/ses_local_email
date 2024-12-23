@@ -26,8 +26,9 @@ if [[ "${branch_name}" != "master" ]]; then
     exit 1
 fi
 
-if [[ "$(git rev-parse HEAD)" != "$(git rev-parse "origin/${branch_name}")" ]]; then
+if [[ "$(git rev-parse HEAD)" != "$(git rev-parse "origin/${branch_name}")" ]] && [[ "${SKIP_UPSTREAM_CHECK:-}" != "true" ]]; then
     echo "Checked out branch is not in sync with origin, aborting"
+    echo "You can set SKIP_UPSTREAM_CHECK=true to disable this check"
     exit 1
 fi
 
