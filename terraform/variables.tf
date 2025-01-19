@@ -37,13 +37,15 @@ variable "user_name" {
 }
 
 variable "lambda_entry_checker_src_dir" {
-  type    = string
-  default = "../lambda/entry_checker"
+  type        = string
+  default     = ""
+  description = "Override default src dir for lambda"
 }
 
 variable "lambda_entry_checker_payload_dir" {
-  type    = string
-  default = "../lambda/entry_checker/payload"
+  type        = string
+  default     = ""
+  description = "Override default payload dir for lambda"
 }
 
 variable "lambda_entry_checker_function_name" {

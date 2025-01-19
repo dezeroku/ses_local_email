@@ -56,13 +56,13 @@ resource "aws_lambda_permission" "lambda_entry_checker_allow_ses" {
 
 data "archive_file" "lambda_entry_checker_payload" {
   type       = "zip"
-  source_dir = var.lambda_entry_checker_src_dir
+  source_dir = local.lambda_entry_checker_src_dir
   excludes = [
     "venv",
     "_pycache_",
     "payload"
   ]
-  output_path = "${var.lambda_entry_checker_payload_dir}/payload.zip"
+  output_path = "${local.lambda_entry_checker_payload_dir}/payload.zip"
 }
 
 resource "aws_lambda_function" "lambda_entry_checker" {
