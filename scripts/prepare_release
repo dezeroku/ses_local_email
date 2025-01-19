@@ -43,8 +43,8 @@ if [[ -n "$(git tag -l "${tag_name}")" ]]; then
 fi
 
 # Now perform the necessary changes
-sed -i "s/default     = \".*\" #SED_RELEASE_VERSION/default     = \"$tag_name\" #SED_RELEASE_VERSION/" terraform/variables.tf
-git add terraform/variables.tf
+#sed -i "s/default     = \".*\" #SED_RELEASE_VERSION/default     = \"$tag_name\" #SED_RELEASE_VERSION/" terraform/variables.tf
+#git add terraform/variables.tf
 
 sed -i "s/@.* #SED_RELEASE_VERSION/@$tag_name #SED_RELEASE_VERSION/" README.md
 sed -i "s/:.* #SED_RELEASE_VERSION/:$tag_name #SED_RELEASE_VERSION/" README.md
